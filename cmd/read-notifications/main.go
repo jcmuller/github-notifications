@@ -36,7 +36,7 @@ func (s *Subject) String() string {
 }
 
 func (n *Notification) String() string {
-	return fmt.Sprintf("%s: [%s]%s %s\n",
+	return fmt.Sprintf("%s: [%s]%s %s",
 		fmtDuration(time.Since(n.When)),
 		n.Reason,
 		n.Subject.String(),
