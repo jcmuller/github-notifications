@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -17,8 +17,7 @@ func getVar(variable string) (value string) {
 
 	value, ok = os.LookupEnv(variable)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "%s is required to run\n", variable)
-		os.Exit(1)
+		log.Fatalf("%s is required to run\n", variable)
 	}
 
 	return
