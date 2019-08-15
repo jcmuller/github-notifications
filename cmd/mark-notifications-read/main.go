@@ -2,34 +2,47 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 	"time"
 
 	"github.com/jcmuller/github-notifications/internal/utils"
 )
 
-func getDate() (t time.Time, err error) {
-	var d time.Duration
+func parseDuration(duration string) (t time.Time, err error) {
+	// Ensure it's a negative duration
+	if strings.Index(duration, "-") == -1 {
+		duration = fmt.Sprintf("-%s", duration)
+	}
+	d, err := time.ParseDuration(duration)
+	if err != nil {
+		return
+	}
 
-	if len(os.Args) == 1 {
-		d, err = time.ParseDuration("-24h")
+	return time.Now().Add(d), nil
+}
+
+func getLimit() (t time.Time, err error) {
+	var duration string
+	var timestamp string
+
+	flag.StringVar(&duration, "duration", "24h", "Time expressed in duration. 15m, 1h, ...")
+	flag.StringVar(&timestamp, "timestamp", "", "Timestamp as of when to clear notification")
+	flag.Parse()
+
+	if len(timestamp) == 0 {
+		t, err = parseDuration(duration)
+
 		if err != nil {
-			return
+			log.Fatalf("Could not parse duration: %v\n", err)
 		}
-
-		t = time.Now().Add(d)
 	} else {
-		// Mon/Day
-		// 01/02 03:04:05PM ‘06 -0700
-		t, err = time.Parse("2006/01/02 15:04", os.Args[1])
-
+		t, err = time.Parse("2006-01-02T15:04", timestamp)
 		if err != nil {
-			err = nil
-			d, err = time.ParseDuration(os.Args[1])
-			t = time.Now().Add(d)
+			log.Fatalf("Could not parse time: %v\n", err)
 		}
 	}
 
@@ -37,9 +50,9 @@ func getDate() (t time.Time, err error) {
 }
 
 func main() {
-	t, err := getDate()
+	t, err := getLimit()
 	if err != nil {
-		log.Fatalf("Could not get a date: %v\n", err)
+		log.Fatalf("Could not get limit: %v\n", err)
 	}
 
 	fmt.Printf("Marking all notifications read as of %s\n", t.Format(time.RFC1123Z))
