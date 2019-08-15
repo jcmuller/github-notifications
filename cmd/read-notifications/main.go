@@ -60,10 +60,10 @@ func fmtDuration(d time.Duration) string {
 	m := d / time.Minute
 
 	if h == 0 {
-		return fmt.Sprintf("%02d minutes ago", m)
+		return fmt.Sprintf("%2d minutes ago", m)
 	}
 
-	return fmt.Sprintf("%02d hours ago", h)
+	return fmt.Sprintf("%2d hours ago", h)
 }
 
 func main() {
