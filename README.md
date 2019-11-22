@@ -20,3 +20,13 @@ $ mark-notifications-read [-duration 24h] [-timestamp 2019-01-01] [-help]
 
 ```
 The default is `24h`.
+
+### read-notifications
+
+It can optionally ignore certain reasons in certain repositories. To achieve this, set up the
+environment variables:
+
+- `RESTRICTED_REPOSITORIES_PATTERN`
+- `RESTRICTED_REPOSITORIES_ALLOWED_REASONS`
+
+These values will be interpreted as regular expressions.

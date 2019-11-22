@@ -7,10 +7,17 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/jcmuller/github-notifications/internal/utils"
+)
+
+var (
+	restrictedRepo = regexp.MustCompile(os.Getenv("RESTRICTED_REPOSITORIES_PATTERN"))
+	allowedReasons = regexp.MustCompile(os.Getenv("RESTRICTED_REPOSITORIES_ALLOWED_REASONS"))
 )
 
 type (
@@ -96,12 +103,21 @@ func main() {
 
 	var notifications []Notification
 	err = json.Unmarshal(body, &notifications)
-	//fmt.Printf("%s", body)
 	if err != nil {
 		log.Fatalf("Error unmarshaling response body: %v\n", err)
 	}
 
 	for _, notification := range notifications {
-		fmt.Println(notification.String())
+		if shouldOutput(notification) {
+			fmt.Println(notification.String())
+		}
 	}
+}
+
+func shouldOutput(notification Notification) bool {
+	if restrictedRepo.MatchString(notification.Repository.Name) {
+		return allowedReasons.MatchString(notification.Reason)
+	}
+
+	return true
 }
